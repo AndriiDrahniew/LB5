@@ -4,9 +4,6 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColum
 import { TradeReports } from './TradeReports';
 import { TrainingAplications } from './TrainingAplications';
 import { Still } from './Still';
-//import { Payment } from './Payment';
-//import { RepairRequest } from './RepairRequest';
-//import { StudentRoomHistory } from './StudentRoomHistory';
 
 @Entity({ name: 'Коні' })
 export class Horses {

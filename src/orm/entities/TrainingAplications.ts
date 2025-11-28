@@ -1,4 +1,4 @@
-//Horses
+//TrainingAplications
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 import { Horses } from './Horses';
@@ -20,7 +20,7 @@ export class TrainingAplications {
   horseid: number;
 
   @Column({ type: 'int', name: 'Id_Клієнта' })
-  clientid: string;
+  clientid: number;
 
   @Column({ type: 'varchar', name: 'Статус' })
   state: string;
@@ -36,7 +36,7 @@ export class TrainingAplications {
   Horses: Horses;
 
   @ManyToOne(() => ClientAckount, (с) => с.TrainingAplications, { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' })
-  @JoinColumn({ name: 'Логін кліента' })
+  @JoinColumn({ name: 'Id_Клієнта' })
   ClientAckount: ClientAckount;
 
   @ManyToOne(() => Treners, (t) => t.TrainingAplications, { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' })

@@ -1,4 +1,4 @@
-//Horses
+//TradeReports
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 import { Horses } from './Horses';

@@ -20,13 +20,12 @@ export const createHorse = async (req: Request, res: Response) => {
       name,
       sex,
       health,
-      stillId,
     } = req.body;
 
-    let still = null;
-    if (stillId !== undefined) {
-      still = await stillRepo().findOne(stillId);
-      if (!still) return res.status(404).json({ message: 'Стійло не знайдено' });
+    // Проверяем, что такое стійло существует
+    const still = await stillRepo().findOne({ where: { stallNumber } });
+    if (!still) {
+      return res.status(404).json({ message: 'Стійло з таким номером не знайдено' });
     }
 
     const newHorse = horsesRepo().create({
@@ -40,11 +39,12 @@ export const createHorse = async (req: Request, res: Response) => {
       name,
       sex,
       health,
-      Still: still || undefined,
+      Still: still, // связь по FK через 'Номер стійла'
     });
 
     const saved = await horsesRepo().save(newHorse);
     return res.status(201).json(saved);
+
   } catch (error) {
     return res.status(500).json({ message: 'Помилка при створенні коня', error });
   }
@@ -52,14 +52,20 @@ export const createHorse = async (req: Request, res: Response) => {
 
 // Get all horses (with relations)
 export const getHorses = async (_req: Request, res: Response) => {
-  const list = await horsesRepo().find({ relations: ['TradeReports', 'TrainingAplications', 'Still'] });
+  const list = await horsesRepo().find({
+    relations: ['TradeReports', 'TrainingAplications', 'Still'],
+  });
   return res.json(list);
 };
 
 // Get horse by id
 export const getHorseById = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const horse = await horsesRepo().findOne(id, { relations: ['TradeReports', 'TrainingAplications', 'Still'] });
+
+  const horse = await horsesRepo().findOne(id, {
+    relations: ['TradeReports', 'TrainingAplications', 'Still'],
+  });
+
   if (!horse) return res.status(404).json({ message: 'Кінь не знайдено' });
   return res.json(horse);
 };
@@ -67,18 +73,27 @@ export const getHorseById = async (req: Request, res: Response) => {
 // Update horse
 export const updateHorse = async (req: Request, res: Response) => {
   const { id } = req.params;
+
   const horse = await horsesRepo().findOne(id);
   if (!horse) return res.status(404).json({ message: 'Кінь не знайдено' });
 
-  const { stillId, ...rest } = req.body;
+  const {
+    stallNumber,
+    ...rest
+  } = req.body;
 
-  if (stillId !== undefined) {
-    const still = await stillRepo().findOne(stillId);
-    if (!still) return res.status(404).json({ message: 'Стійло не знайдено' });
+  // Если отправлен новый номер стійла — проверяем
+  if (stallNumber !== undefined) {
+    const still = await stillRepo().findOne({ where: { stallNumber } });
+    if (!still) {
+      return res.status(404).json({ message: 'Стійло з таким номером не існує' });
+    }
+    horse.stallNumber = stallNumber;
     horse.Still = still;
   }
 
   Object.assign(horse, rest);
+
   const updated = await horsesRepo().save(horse);
   return res.json(updated);
 };
@@ -86,6 +101,7 @@ export const updateHorse = async (req: Request, res: Response) => {
 // Delete horse
 export const deleteHorse = async (req: Request, res: Response) => {
   const { id } = req.params;
+
   const horse = await horsesRepo().findOne(id);
   if (!horse) return res.status(404).json({ message: 'Кінь не знайдено' });
 
