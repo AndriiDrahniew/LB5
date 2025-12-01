@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { createTradeReport, getTradeReports, getTradeReportById, updateTradeReport, deleteTradeReport } from '../../controllers/TradeReportsControllers';
+import { TradeReportsController } from '../../controllers/TradeReportsControllers';
 
 const router = Router();
 
-router.post('/', createTradeReport);
-router.get('/', getTradeReports);
-router.get('/:id', getTradeReportById);
-router.put('/:id', updateTradeReport);
-router.delete('/:id', deleteTradeReport);
+router.post('/', TradeReportsController.create);
+router.get('/', TradeReportsController.getAll);
+router.get('/:id', TradeReportsController.getById);
+router.put('/:id', TradeReportsController.update);
+router.delete('/:id', TradeReportsController.delete);
 
 export default router;

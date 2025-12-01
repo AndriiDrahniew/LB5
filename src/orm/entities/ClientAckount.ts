@@ -1,6 +1,6 @@
+//ClientAckount
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany} from 'typeorm';
 
-//import { TradeReports } from './TradeReports';
 import { TrainingAplications } from './TrainingAplications';
 
 @Entity({ name: 'Аккаунт користувача' })
@@ -15,7 +15,7 @@ export class ClientAckount {
   weightClient: number;
 
   @Column({ type: 'varchar', name: 'Прізвище', length: 50 })
-  breed: string;
+  surname: string;
 
   @Column({ type: 'varchar', name: "Ім'я", length: 50 })
   name: string;

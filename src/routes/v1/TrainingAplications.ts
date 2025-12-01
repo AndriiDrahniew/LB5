@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { createTrainingAplication, getTrainingAplications, getTrainingAplicationById, updateTrainingAplication, deleteTrainingAplication } from '../../controllers/TrainingAplicationsController';
+import { TrainingAplicationsController } from '../../controllers/TrainingAplicationsController';
 
 const router = Router();
 
-router.post('/', createTrainingAplication);
-router.get('/', getTrainingAplications);
-router.get('/:id', getTrainingAplicationById);
-router.put('/:id', updateTrainingAplication);
-router.delete('/:id', deleteTrainingAplication);
+router.post('/', TrainingAplicationsController.create);
+router.get('/', TrainingAplicationsController.getAll);
+router.get('/:id', TrainingAplicationsController.getById);
+router.put('/:id', TrainingAplicationsController.update);
+router.delete('/:id', TrainingAplicationsController.delete);
 
 export default router;

@@ -1,79 +1,55 @@
-import { Request, Response } from 'express';
-import { getRepository } from 'typeorm';
-import { TradeReports } from '../orm/entities/TradeReports';
-import { Horses } from '../orm/entities/Horses';
+import { Request, Response, NextFunction } from 'express';
 
-const reportsRepo = () => getRepository(TradeReports);
-const horsesRepo = () => getRepository(Horses);
+import { TradeReportsService } from '../services/TradeReportsService';
 
-// Create report
-export const createTradeReport = async (req: Request, res: Response) => {
-  try {
-    const { actiontype, cost, name, surname, horseid } = req.body;
+const tradeReportsService = new TradeReportsService();
 
-    const horse = horseid ? await horsesRepo().findOne(horseid) : null;
-    if (horseid && !horse) return res.status(404).json({ message: 'Кінь не знайдено' });
-
-    const newReport = reportsRepo().create({
-      actiontype,
-      cost,
-      name,
-      surname,
-      horseid,
-      Horses: horse || undefined,
-    });
-
-    const saved = await reportsRepo().save(newReport);
-    return res.status(201).json(saved);
-  } catch (error) {
-    return res.status(500).json({ message: 'Помилка при створенні звіту', error });
-  }
-};
-
-// Get all (with horse)
-export const getTradeReports = async (_req: Request, res: Response) => {
-  const list = await reportsRepo().find({ relations: ['Horses'] });
-  return res.json(list);
-};
-
-// Get by id
-export const getTradeReportById = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const item = await reportsRepo().findOne(id, { relations: ['Horses'] });
-  if (!item) return res.status(404).json({ message: 'Звіт не знайдено' });
-  return res.json(item);
-};
-
-// Update
-export const updateTradeReport = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const item = await reportsRepo().findOne(id);
-  if (!item) return res.status(404).json({ message: 'Звіт не знайдено' });
-
-  const { actiontype, cost, name, surname, horseid } = req.body;
-
-  if (horseid !== undefined) {
-    const horse = await horsesRepo().findOne(horseid);
-    if (!horse) return res.status(404).json({ message: 'Кінь не знайдено' });
-    item.Horses = horse;
-    item.horseid = horseid;
+export class TradeReportsController {
+  static async getAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await tradeReportsService.getAllTradeReports();
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
   }
 
-  item.actiontype = actiontype ?? item.actiontype;
-  item.cost = cost ?? item.cost;
-  item.name = name ?? item.name;
-  item.surname = surname ?? item.surname;
+  static async getById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const result = await tradeReportsService.getTradeReportById(id);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
 
-  const updated = await reportsRepo().save(item);
-  return res.json(updated);
-};
+  static async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await tradeReportsService.createTradeReport(req.body);
+      res.status(201).json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
 
-// Delete
-export const deleteTradeReport = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const item = await reportsRepo().findOne(id);
-  if (!item) return res.status(404).json({ message: 'Звіт не знайдено' });
+  static async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const result = await tradeReportsService.updateTradeReport(id, req.body);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
 
-  await reportsRepo().remove(item);
-  return res.json({ message: 'Звіт успішно видалено' });
-};
+  static async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const result = await tradeReportsService.deleteTradeReport(id);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+}
