@@ -1,9 +1,19 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class entities1764181697262 implements MigrationInterface {
-    name = 'entities1764181697262'
+export class entities1764944450874 implements MigrationInterface {
+    name = 'entities1764944450874'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
+            CREATE TABLE "Збруя" (
+                "ID_Збруї" SERIAL NOT NULL,
+                "Тип" character varying(20) NOT NULL,
+                "Номер стійла" smallint NOT NULL,
+                "Назва" character varying(50) NOT NULL,
+                "Примітка" character varying(250) NOT NULL,
+                CONSTRAINT "PK_0873489cbbcb7e8c485185e89e8" PRIMARY KEY ("ID_Збруї")
+            )
+        `);
         await queryRunner.query(`
             CREATE TABLE "Відомості про торгівлю тваринами" (
                 "Номер транзакції" SERIAL NOT NULL,
@@ -24,14 +34,6 @@ export class entities1764181697262 implements MigrationInterface {
                 "Ім'я" character varying(50) NOT NULL,
                 CONSTRAINT "UQ_68286159545bb4877191d1e3099" UNIQUE ("Логін"),
                 CONSTRAINT "PK_20834fe3268c6da8607652938df" PRIMARY KEY ("Id")
-            )
-        `);
-        await queryRunner.query(`
-            CREATE TABLE "Конюхи" (
-                "Id" integer NOT NULL,
-                "Номер стійла" smallint NOT NULL,
-                CONSTRAINT "REL_09f0eddd5dda2aa5072b237ddd" UNIQUE ("Id"),
-                CONSTRAINT "PK_09f0eddd5dda2aa5072b237ddd6" PRIMARY KEY ("Id")
             )
         `);
         await queryRunner.query(`
@@ -63,7 +65,6 @@ export class entities1764181697262 implements MigrationInterface {
                 "Статус" character varying NOT NULL,
                 "Точний час тренування" character varying NOT NULL,
                 "Тренер" integer NOT NULL,
-                "Логін кліента" integer,
                 CONSTRAINT "PK_a7c4fa94a5d3697ff44c5e844c4" PRIMARY KEY ("Номер заявки")
             )
         `);
@@ -92,13 +93,11 @@ export class entities1764181697262 implements MigrationInterface {
             )
         `);
         await queryRunner.query(`
-            CREATE TABLE "Збруя" (
-                "ID_Збруї" SERIAL NOT NULL,
-                "Тип" character varying(20) NOT NULL,
+            CREATE TABLE "Конюхи" (
+                "Id" integer NOT NULL,
                 "Номер стійла" smallint NOT NULL,
-                "Назва" character varying(50) NOT NULL,
-                "Примітка" character varying(250) NOT NULL,
-                CONSTRAINT "PK_0873489cbbcb7e8c485185e89e8" PRIMARY KEY ("ID_Збруї")
+                CONSTRAINT "REL_09f0eddd5dda2aa5072b237ddd" UNIQUE ("Id"),
+                CONSTRAINT "PK_09f0eddd5dda2aa5072b237ddd6" PRIMARY KEY ("Id")
             )
         `);
         await queryRunner.query(`
@@ -137,16 +136,12 @@ export class entities1764181697262 implements MigrationInterface {
             ADD "name" character varying
         `);
         await queryRunner.query(`
+            ALTER TABLE "Збруя"
+            ADD CONSTRAINT "FK_be259c2021dc2f7d9d52b2df0c7" FOREIGN KEY ("Номер стійла") REFERENCES "Стійло"("Номер стійла") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
             ALTER TABLE "Відомості про торгівлю тваринами"
             ADD CONSTRAINT "FK_1a6c8f9506372111799071a8e95" FOREIGN KEY ("Id_Коня") REFERENCES "Коні"("Id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
-            ALTER TABLE "Конюхи"
-            ADD CONSTRAINT "FK_09f0eddd5dda2aa5072b237ddd6" FOREIGN KEY ("Id") REFERENCES "Посади"("Id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
-            ALTER TABLE "Конюхи"
-            ADD CONSTRAINT "FK_1e3122a3de1b04293105629990a" FOREIGN KEY ("Номер стійла") REFERENCES "Стійло"("Номер стійла") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
             ALTER TABLE "Тренери"
@@ -158,7 +153,7 @@ export class entities1764181697262 implements MigrationInterface {
         `);
         await queryRunner.query(`
             ALTER TABLE "Заявки на тренування"
-            ADD CONSTRAINT "FK_dad6cbc90cee344bc9e85cdefd9" FOREIGN KEY ("Логін кліента") REFERENCES "Аккаунт користувача"("Id") ON DELETE NO ACTION ON UPDATE NO ACTION
+            ADD CONSTRAINT "FK_e76efe37e617f963a0c562f24e7" FOREIGN KEY ("Id_Клієнта") REFERENCES "Аккаунт користувача"("Id") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
             ALTER TABLE "Заявки на тренування"
@@ -169,14 +164,21 @@ export class entities1764181697262 implements MigrationInterface {
             ADD CONSTRAINT "FK_d10443ffdf86bf95298648cbc2f" FOREIGN KEY ("Номер стійла") REFERENCES "Стійло"("Номер стійла") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
         await queryRunner.query(`
-            ALTER TABLE "Збруя"
-            ADD CONSTRAINT "FK_be259c2021dc2f7d9d52b2df0c7" FOREIGN KEY ("Номер стійла") REFERENCES "Стійло"("Номер стійла") ON DELETE NO ACTION ON UPDATE NO ACTION
+            ALTER TABLE "Конюхи"
+            ADD CONSTRAINT "FK_09f0eddd5dda2aa5072b237ddd6" FOREIGN KEY ("Id") REFERENCES "Посади"("Id") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "Конюхи"
+            ADD CONSTRAINT "FK_1e3122a3de1b04293105629990a" FOREIGN KEY ("Номер стійла") REFERENCES "Стійло"("Номер стійла") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
-            ALTER TABLE "Збруя" DROP CONSTRAINT "FK_be259c2021dc2f7d9d52b2df0c7"
+            ALTER TABLE "Конюхи" DROP CONSTRAINT "FK_1e3122a3de1b04293105629990a"
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "Конюхи" DROP CONSTRAINT "FK_09f0eddd5dda2aa5072b237ddd6"
         `);
         await queryRunner.query(`
             ALTER TABLE "Коні" DROP CONSTRAINT "FK_d10443ffdf86bf95298648cbc2f"
@@ -185,7 +187,7 @@ export class entities1764181697262 implements MigrationInterface {
             ALTER TABLE "Заявки на тренування" DROP CONSTRAINT "FK_4428aa217bf641990fbda3098ef"
         `);
         await queryRunner.query(`
-            ALTER TABLE "Заявки на тренування" DROP CONSTRAINT "FK_dad6cbc90cee344bc9e85cdefd9"
+            ALTER TABLE "Заявки на тренування" DROP CONSTRAINT "FK_e76efe37e617f963a0c562f24e7"
         `);
         await queryRunner.query(`
             ALTER TABLE "Заявки на тренування" DROP CONSTRAINT "FK_1a72b9d4f1b7b762ec8d8b5f71b"
@@ -194,13 +196,10 @@ export class entities1764181697262 implements MigrationInterface {
             ALTER TABLE "Тренери" DROP CONSTRAINT "FK_aadade738db01a9a4fd2b4f69c8"
         `);
         await queryRunner.query(`
-            ALTER TABLE "Конюхи" DROP CONSTRAINT "FK_1e3122a3de1b04293105629990a"
-        `);
-        await queryRunner.query(`
-            ALTER TABLE "Конюхи" DROP CONSTRAINT "FK_09f0eddd5dda2aa5072b237ddd6"
-        `);
-        await queryRunner.query(`
             ALTER TABLE "Відомості про торгівлю тваринами" DROP CONSTRAINT "FK_1a6c8f9506372111799071a8e95"
+        `);
+        await queryRunner.query(`
+            ALTER TABLE "Збруя" DROP CONSTRAINT "FK_be259c2021dc2f7d9d52b2df0c7"
         `);
         await queryRunner.query(`
             ALTER TABLE "users" DROP COLUMN "name"
@@ -238,7 +237,7 @@ export class entities1764181697262 implements MigrationInterface {
             ADD CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email")
         `);
         await queryRunner.query(`
-            DROP TABLE "Збруя"
+            DROP TABLE "Конюхи"
         `);
         await queryRunner.query(`
             DROP TABLE "Стійло"
@@ -256,13 +255,13 @@ export class entities1764181697262 implements MigrationInterface {
             DROP TABLE "Посади"
         `);
         await queryRunner.query(`
-            DROP TABLE "Конюхи"
-        `);
-        await queryRunner.query(`
             DROP TABLE "Аккаунт користувача"
         `);
         await queryRunner.query(`
             DROP TABLE "Відомості про торгівлю тваринами"
+        `);
+        await queryRunner.query(`
+            DROP TABLE "Збруя"
         `);
     }
 
