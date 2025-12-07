@@ -6,7 +6,7 @@ const router = Router();
 router.post('/', TrainingAplicationsController.create);
 router.get('/', TrainingAplicationsController.getAll);
 router.get('/:id', TrainingAplicationsController.getById);
-router.put('/:id', TrainingAplicationsController.update);
+router.patch('/:id', TrainingAplicationsController.update);
 router.delete('/:id', TrainingAplicationsController.delete);
 
 export default router;
