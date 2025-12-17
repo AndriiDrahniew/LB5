@@ -4,7 +4,7 @@
 
 ## Діаграмма сутностей:
 
-![Діаграмма](/img/photo_2025-11-21_18-58-47.jpg)
+![Діаграмма]()
 
 ## Короткий опис реалізованих сутностей:
 ### Horses - сутність що описує всіх коней.
@@ -48,3 +48,56 @@
 * `DELETE /TrainingAplications/:id` — видалення заявки
 
 ---
+
+## Postman
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20103709.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20103846.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20103940.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20105935.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20110058.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20112248.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20112411.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20112427.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20112557.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20112610.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20113250.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20113316.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20113329.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20113437.png)
+
+![photo](https://github.com/AndriiDrahniew/LB5/blob/main/Screenshots/Screenshot%202025-12-07%20113451.png)
+
+# Лабораторно-практична робота №6
+
+## Шари додатку
+
+### Middleware
+Middleware-функції перевіряють коректність даних до передачі їх у бізнес-логіку.
+У разі помилки — створюється об’єкт CustomError із статусом 400 Bad Request.
+
+### Controller
+Контролери відповідають за: прийом запиту від клієнта, виклик відповідного сервісу, формування та повернення відповіді або помилки. Контролер не містить бізнес-логіки — лише координує запит.
+
+### Service
+Сервіси реалізують бізнес-правила додатку. Вони працюють з даними, виконують перевірки, звертаються до репозиторіїв і повертають результат у вигляді DTO.
+
+## Приклади коду
+### Middleware
+
+### Controller
+
+### Services
