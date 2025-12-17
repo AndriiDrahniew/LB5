@@ -97,7 +97,206 @@ Middleware-функції перевіряють коректність дани
 
 ## Приклади коду
 ### Middleware
+```
+import { Request, Response, NextFunction } from 'express';
+import { HorsesService } from '../services/HorsesService';
 
+export class HorsesController {
+  static async getAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const horsesService = new HorsesService();
+      const result = await horsesService.getAllHorses();
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async getById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const horsesService = new HorsesService();
+      const result = await horsesService.getHorseById(id);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const horsesService = new HorsesService();
+      const result = await horsesService.createHorse(req.body);
+      res.status(201).json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const horsesService = new HorsesService();
+      const result = await horsesService.updateHorse(id, req.body);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const horsesService = new HorsesService();
+      const result = await horsesService.deleteHorse(id);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+}
+```
 ### Controller
+```
+import { Request, Response, NextFunction } from 'express';
+import validator from 'validator';
+import { CustomError } from '../../../utils/response/custom-error/CustomError';
 
+export const validatorCreateHorse = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const {
+      weight,
+      stallNumber,
+      using,
+      owner,
+      age,
+      height,
+      breed,
+      name,
+      sex,
+      health
+    } = req.body;
+
+    const errorsValidation: { [key: string]: string }[] = [];
+
+    if (!weight || !validator.isInt(String(weight))) {
+      errorsValidation.push({ weight: "Поле 'Вага' повинно бути цілим числом" });
+    }
+
+    if (!stallNumber || !validator.isInt(String(stallNumber))) {
+      errorsValidation.push({ stallNumber: "Поле 'Номер стійла' повинно бути цілим числом" });
+    }
+
+    if (!using || validator.isEmpty(using.trim())) {
+      errorsValidation.push({ using: "Поле 'Використання' є обов’язковим" });
+    }
+
+    if (!owner || validator.isEmpty(owner.trim())) {
+      errorsValidation.push({ owner: "Поле 'Власник' є обов’язковим" });
+    }
+
+    if (!age || !validator.isInt(String(age))) {
+      errorsValidation.push({ age: "Поле 'Вік' повинно бути цілим числом" });
+    }
+
+    if (!height || !validator.isInt(String(height))) {
+      errorsValidation.push({ height: "Поле 'Зріст' повинно бути цілим числом" });
+    }
+
+    if (!breed || validator.isEmpty(breed.trim())) {
+      errorsValidation.push({ breed: "Поле 'Порода' є обов’язковим" });
+    }
+
+    if (!name || validator.isEmpty(name.trim())) {
+      errorsValidation.push({ name: "Поле \"Ім'я\" є обов’язковим" });
+    }
+
+    if (!sex || validator.isEmpty(sex.trim())) {
+      errorsValidation.push({ sex: "Поле 'Стать' є обов’язковим" });
+    } else if (!['M', 'F'].includes(sex)) {
+      errorsValidation.push({ sex: "Поле 'Стать' повинно бути 'M' або 'F'" });
+    }
+
+    if (health && !validator.isLength(health, { max: 1000 })) {
+      errorsValidation.push({ health: "Поле \"Стан здоров'я\" не повинно перевищувати 1000 символів" });
+    }
+
+    if (errorsValidation.length > 0) {
+      throw new CustomError(400, 'Validation', 'Помилка валідації коня', null, null, errorsValidation);
+    }
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+```
 ### Services
+```
+import { getRepository } from 'typeorm';
+import { Horses } from '../orm/entities/Horses';
+import { HorsesDto } from '../dto/HorsesDto';
+import { CustomError } from '../utils/response/custom-error/CustomError';
+
+export class HorsesService {
+  private horsesRepository = getRepository(Horses);
+
+  async getAllHorses() {
+    const horses = await this.horsesRepository.find({
+      relations: ['TradeReports', 'TrainingAplications', 'Still'],
+    });
+    return horses.map((h) => new HorsesDto(h));
+  }
+
+  async getHorseById(id: number) {
+    if (isNaN(id)) {
+      throw new CustomError(400, 'Validation', 'Некоректний ID коня');
+    }
+
+    const horse = await this.horsesRepository.findOne({
+      where: { id },
+      relations: ['TradeReports', 'TrainingAplications', 'Still'],
+    });
+
+    if (!horse) {
+      throw new CustomError(404, 'General', 'Коня не знайдено');
+    }
+
+    return new HorsesDto(horse);
+  }
+
+  async createHorse(data: Partial<Horses>) {
+    const entity = this.horsesRepository.create(data);
+    const created = await this.horsesRepository.save(entity);
+    return new HorsesDto(created);
+  }
+
+  async updateHorse(id: number, data: Partial<Horses>) {
+    if (isNaN(id)) {
+      throw new CustomError(400, 'Validation', 'Некоректний ID коня');
+    }
+
+    const horse = await this.horsesRepository.findOne({ where: { id } });
+    if (!horse) {
+      throw new CustomError(404, 'General', 'Коня не знайдено');
+    }
+
+    Object.assign(horse, data);
+    const updated = await this.horsesRepository.save(horse);
+    return new HorsesDto(updated);
+  }
+
+  async deleteHorse(id: number) {
+    if (isNaN(id)) {
+      throw new CustomError(400, 'Validation', 'Некоректний ID коня');
+    }
+
+    const result = await this.horsesRepository.delete(id);
+    if (!result.affected) {
+      throw new CustomError(404, 'General', 'Коня не знайдено');
+    }
+
+    return { message: `Кінь з ID ${id} успішно видалений` };
+  }
+}
+```
